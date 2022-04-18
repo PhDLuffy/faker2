@@ -1,30 +1,17 @@
-name: Merge upstream
+# .github/workflows/sync.yml
+name: Sync Fork
 
 on:
-  # 推送代码后触发
-  push:
-  # 定时任务触发，使用 cron 规则，这里默认一小时执行一次
+  push: # push 时触发, 主要是为了测试配置有没有问题
   schedule:
-    - cron: '0 * * * *'
-
+    - cron: '* */3 * * *' # 每3小时触发, 对于一些更新不那么频繁的项目可以设置为每天一次, 低碳一点
 jobs:
-  merge:
+  repo-sync:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - name: Merge upstream
-        run: |
-          # 使用自己的用户名替换 username
-          git config --global user.name 'PhDLuffy'
-          git config --global user.email 'PhDLuffy@phdluffy.com'
-
-          git pull --unshallow
-
-          # 自行替换要同步的上游仓库地址
-          git remote add upstream https://github.com/shufflewzc/faker2.git
-          git fetch upstream
-
-          # 可以自定义要同步的分支
-          git checkout -b main origin/main
-          git merge --no-edit upstream/main
-          git push origin main
+      - uses: TG908/fork-sync@v1.6.3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          owner: shufflewzc # fork 的上游仓库 user
+          head: main # fork 的上游仓库 branch
+          base: main # 本地仓库 branch
